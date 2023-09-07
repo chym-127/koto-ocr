@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from typing_extensions import Annotated
 from fastapi.middleware.cors import CORSMiddleware
 from paddleocr import PaddleOCR
-import time
+ocr = PaddleOCR(use_angle_cls=True, lang="ch",use_gpu=False)
 
 MAX_TASK_COUNT = 2
 CURRENT_TASK_COUNT = 0
@@ -54,7 +54,6 @@ def create_upload_file(
         return resp("已达到最大任务数，请稍后再试",None,100)
     CURRENT_TASK_COUNT += 1
     try:
-        ocr = PaddleOCR(use_angle_cls=True, lang="ch",use_gpu=False)
         contents = file.file.read()
         result = ocr.ocr(contents, cls=True)
         return resp("操作成功", ocr_text(result),0)
