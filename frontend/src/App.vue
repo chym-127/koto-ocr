@@ -136,7 +136,7 @@ const selectText = (item: TextItem) => {
   border: 1px solid red;
   background-color: #fff;
   font-size: 12px;
-  opacity: 1;
+  opacity: 0;
   z-index: 99;
 }
 

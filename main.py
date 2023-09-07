@@ -42,7 +42,7 @@ def ocr_text(data:any):
 
 @app.get("/ping")
 def root():
-    return {"message": "ok"}
+    return resp()
 
 
 @app.post("/ocr/text")
@@ -50,7 +50,6 @@ def create_upload_file(
     file: UploadFile = File(description="A file read as UploadFile"),
 ):
     global CURRENT_TASK_COUNT,MAX_TASK_COUNT
-    print("CURRENT_TASK_COUNT",CURRENT_TASK_COUNT)
     if CURRENT_TASK_COUNT > MAX_TASK_COUNT:
         return resp("已达到最大任务数，请稍后再试",None,100)
     CURRENT_TASK_COUNT += 1
