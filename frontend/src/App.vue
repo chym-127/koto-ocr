@@ -36,6 +36,7 @@ interface TextItem {
   left: string;
   height: string;
   width: string;
+  rotate?: string;
 }
 
 const list = reactive<TextItem[]>([]);
@@ -51,12 +52,22 @@ const ocrText = (file: File) => {
     .then(function (response: any) {
       if (response.data?.data?.length) {
         response.data.data.forEach((item: any) => {
+          let width =
+            getDistanceBetweenTwoPoints(item.rect[1][0], item.rect[1][1], item.rect[0][0], item.rect[0][1]) * scale;
+          let rotate = 'rotate(0deg)';
+          if (item.rect[0][1] !== item.rect[1][1]) {
+            rotate = `rotate(${calAngle(
+              [item.rect[0][1], 1],
+              [item.rect[1][0] - item.rect[0][0], item.rect[1][1] - item.rect[0][1]]
+            )}deg)`;
+          }
           let textItem: TextItem = {
             content: item.content,
             top: item.rect[0][1] * scale + 'px',
             left: item.rect[0][0] * scale + 'px',
             height: (item.rect[3][1] - item.rect[0][1]) * scale + 'px',
-            width: item.rect[1][0] * scale - item.rect[0][0] * scale + 'px',
+            rotate: rotate,
+            width: width + 'px',
           };
           list.push(textItem);
         });
@@ -72,6 +83,31 @@ const ocrText = (file: File) => {
       maskVisible.value = false;
     });
 };
+
+function getDistanceBetweenTwoPoints(x1: number, y1: number, x2: number, y2: number) {
+  var a = x1 - x2;
+  var b = y1 - y2;
+  var result = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+  return result;
+}
+
+function calCos(a: Array<number>, b: Array<number>) {
+  // 点积
+  let dotProduct = a[0] * b[0] + a[1] * b[1];
+  let d = Math.sqrt(a[0] * a[0] + a[1] * a[1]) * Math.sqrt(b[0] * b[0] + b[1] * b[1]);
+  return dotProduct / d;
+}
+
+function calAngle(a: Array<number>, b: Array<number>) {
+  const radian = calCos(a, b);
+  let angle = (Math.acos(radian) * 180) / Math.PI;
+  if (a[0] > b[1]) {
+    angle = -angle;
+  }
+  return angle;
+}
+
+console.log(calAngle([816, 1], [775, 527]));
 
 // function updateTextFontSize() {
 //   let listEl: any = document.getElementsByClassName('text-item');
@@ -131,7 +167,14 @@ function notifyMe() {
         class="text-item"
         v-for="item in list"
         @click="selectText(item)"
-        :style="{ top: item.top, left: item.left, width: item.width, height: item.height, lineHeight: item.height }"
+        :style="{
+          top: item.top,
+          left: item.left,
+          width: item.width,
+          height: item.height,
+          lineHeight: item.height,
+          transform: item.rotate,
+        }"
       >
         <!-- <div class="text">{{ item.content }}</div> -->
       </div>
@@ -181,7 +224,7 @@ function notifyMe() {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 3rem;
+  font-size: 2rem;
 }
 .img-box {
   position: relative;
@@ -200,6 +243,7 @@ function notifyMe() {
   background-color: transparent;
   font-size: 12px;
   z-index: 99;
+  transform-origin: top left;
 }
 
 .text-item .text {
