@@ -125,7 +125,11 @@ console.log(calAngle([816, 1], [775, 527]));
 
 const currentContent = ref('');
 const selectText = (item: TextItem) => {
-  currentContent.value = item.content;
+  if (mode.value) {
+    currentContent.value += item.content + '\n';
+  } else {
+    currentContent.value = item.content;
+  }
 };
 
 const copy = (text: string) => {
@@ -155,6 +159,8 @@ function notifyMe() {
   }).showToast();
   // want to be respectful there is no need to bother them anymore.
 }
+
+const mode = ref(false);
 </script>
 
 <template>
@@ -174,9 +180,10 @@ function notifyMe() {
           height: item.height,
           lineHeight: item.height,
           transform: item.rotate,
+          background: mode ? '#fff' : 'transparent',
         }"
       >
-        <!-- <div class="text">{{ item.content }}</div> -->
+        <div class="text" v-if="mode">{{ item.content }}</div>
       </div>
       <img id="img" src="" alt="" srcset="" />
     </div>
@@ -184,8 +191,12 @@ function notifyMe() {
     <div class="bottom-box">
       <div class="header-box">
         <label for="upload-file" style="cursor: pointer; color: blue">选择图片</label>
-
-        <label style="cursor: pointer; color: blue" @click="copy(currentContent)">复制</label>
+        <div>
+          <label style="cursor: pointer; color: blue; margin-right: 12px" @click="mode = !mode">
+            {{ mode ? '选择模式' : '普通模式' }}
+          </label>
+          <label style="cursor: pointer; color: blue" @click="copy(currentContent)">复制</label>
+        </div>
       </div>
       <textarea
         name=""
@@ -240,7 +251,6 @@ function notifyMe() {
   cursor: pointer;
   position: absolute;
   border: 1px solid red;
-  background-color: transparent;
   font-size: 12px;
   z-index: 99;
   transform-origin: top left;
